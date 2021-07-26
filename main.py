@@ -15,27 +15,23 @@ class game(object):
 		self.botStarts = False
 		self.gameOver = False
 		self.player = player
-		self.startGame(False, 'player')
 		self.channel = channel
 
 	async def printBoard(self):
-		board_message = ''
-		board_message += self.board[1] + '|' + self.board[2] + '|' + self.board[3] + '\n'
-		board_message += self.board[4] + '|' + self.board[5] + '|' + self.board[6] + '\n'
-		board_message += self.board[7] + '|' + self.board[8] + '|' + self.board[9]
+		board_message = '\n' + self.board[1] + '|' + self.board[2] + '|' + self.board[3] + '\n' + self.board[4] + '|' + self.board[5] + '|' + self.board[6] + '\n' + self.board[7] + '|' + self.board[8] + '|' + self.board[9]
 
 		await self.channel.send(board_message)
 
 	def spaceIsFree(self, position):
-		if self.board[position] == ' ':
+		if self.board[position] == '#':
 			return True
 		else:
 			return False
 
-	def insertLetter(self, letter, position):
+	async def insertLetter(self, letter, position):
 		if self.spaceIsFree(position):
 			self.board[position] = letter
-			#self.printBoard()
+			await self.printBoard()
 			if self.checkDraw():
 				print("It's a Draw")
 				gameOver = True
@@ -64,21 +60,21 @@ class game(object):
 		return
 
 	def checkForWin(self):
-		if (self.board[1] == self.board[2] and self.board[1] == self.board[3] and self.board[1] != ' '):
+		if (self.board[1] == self.board[2] and self.board[1] == self.board[3] and self.board[1] != '#'):
 			return True
-		elif (self.board[4] == self.board[5] and self.board[4] == self.board[6] and self.board[4] != ' '):
+		elif (self.board[4] == self.board[5] and self.board[4] == self.board[6] and self.board[4] != '#'):
 			return True
-		elif (self.board[7] == self.board[8] and self.board[7] == self.board[9] and self.board[7] != ' '):
+		elif (self.board[7] == self.board[8] and self.board[7] == self.board[9] and self.board[7] != '#'):
 			return True
-		elif (self.board[1] == self.board[4] and self.board[1] ==self. board[7] and self.board[1] != ' '):
+		elif (self.board[1] == self.board[4] and self.board[1] ==self. board[7] and self.board[1] != '#'):
 			return True
-		elif (self.board[2] == self.board[5] and self.board[2] == self.board[8] and self.board[2] != ' '):
+		elif (self.board[2] == self.board[5] and self.board[2] == self.board[8] and self.board[2] != '#'):
 			return True	
-		elif (self.board[3] == self.board[6] and self.board[3] == self.board[9] and self.board[3] != ' '):
+		elif (self.board[3] == self.board[6] and self.board[3] == self.board[9] and self.board[3] != '#'):
 			return True
-		elif (self.board[1] == self.board[5] and self.board[1] == self.board[9] and self.board[1] != ' '):
+		elif (self.board[1] == self.board[5] and self.board[1] == self.board[9] and self.board[1] != '#'):
 			return True
-		elif (self.board[7] == self.board[5] and self.board[7] == self.board[3] and self.board[7] != ' '):
+		elif (self.board[7] == self.board[5] and self.board[7] == self.board[3] and self.board[7] != '#'):
 			return True
 		else:
 			return False
@@ -109,14 +105,14 @@ class game(object):
 				return False
 		return True
 
-	def playerMove(self):
+	async def playerMove(self):
 		position = 0
 		while not position in [1, 2, 3, 4, 5, 6, 7, 8, 9]:
 			position = int(input("Enter the position for 'O':  "))
-		self.insertLetter(self.player_token, position)
+		await self.insertLetter(self.player_token, position)
 		return
 
-	def compMove(self):
+	async def compMove(self):
 		bestScore = -800
 		bestMove = 0
 		for key in self.board.keys():
@@ -128,7 +124,7 @@ class game(object):
 					bestScore = score
 					bestMove = key
 
-		self.insertLetter(self.bot_token, bestMove)
+		await self.insertLetter(self.bot_token, bestMove)
 		return
 
 
@@ -143,10 +139,10 @@ class game(object):
 		if (isMaximizing):
 			bestScore = -800
 			for key in self.board.keys():
-				if (board[key] == ' '):
+				if (board[key] == '#'):
 					self.board[key] = self.bot
 					score = self.minimax(board, depth + 1, False)
-					self.board[key] = ' '
+					self.board[key] = '#'
 					if (score > bestScore):
 						bestScore = score
 			return bestScore
@@ -154,17 +150,17 @@ class game(object):
 		else:
 			bestScore = 800
 			for key in self.board.keys():
-				if (self.board[key] == ' '):
+				if (self.board[key] == '#'):
 					self.board[key] = self.player_token
 					score = self.minimax(self.board, depth + 1, True)
-					self.board[key] = ' '
+					self.board[key] = '#'
 					if (score < bestScore):
 						bestScore = score
 			return bestScore
 
 	async def startGame(self, isRematch, winner):
 		self.gameOver = False
-		self.board = {1: ' ', 2: ' ', 3: ' ', 4: ' ', 5: ' ', 6: ' ', 7: ' ', 8: ' ', 9: ' '}
+		self.board = {1: '#', 2: '#', 3: '#', 4: '#', 5: '#', 6: '#', 7: '#', 8: '#', 9: '#'}
 		if isRematch:
 			if (winner == 'player'):
 				botStarts = False
@@ -176,17 +172,18 @@ class game(object):
 			botStarts = bool(random.randint(0, 1))
 		if botStarts:
 			while not self.gameOver:
-				self.compMove()
-				self.playerMove()
+				await self.compMove()
+				await self.playerMove()
 		else:
 			await self.printBoard()
 			while not self.gameOver:
-				self.playerMove()
-				self.compMove()
+				await self.playerMove()
+				await self.compMove()
 
 @client.command()
 async def start(ctx):
 	session = game(ctx.message.author, ctx.channel)
+	await session.startGame(False, 'player')
 	await session.printBoard()
 
 @client.event

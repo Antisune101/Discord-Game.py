@@ -48,14 +48,6 @@ optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 
 [[package]]
-name = "chess"
-version = "1.6.1"
-description = "A chess library with move generation and validation, Polyglot opening book probing, PGN reading and writing, Gaviota tablebase probing, Syzygy tablebase probing, and XBoard/UCI engine communication."
-category = "main"
-optional = false
-python-versions = ">=3.7"
-
-[[package]]
 name = "discord"
 version = "1.7.3"
 description = "A mirror package for discord.py. Please install that instead."
@@ -98,17 +90,6 @@ optional = false
 python-versions = ">=3.6"
 
 [[package]]
-name = "python-chess"
-version = "1.999"
-description = "A chess library with move generation, move validation, and support for common formats."
-category = "main"
-optional = false
-python-versions = "*"
-
-[package.dependencies]
-chess = ">=1,<2"
-
-[[package]]
 name = "typing-extensions"
 version = "3.10.0.0"
 description = "Backported and Experimental Type Hints for Python 3.5+"
@@ -131,7 +112,7 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "5c30ab22962c871d657ff4785b9ecf0f81cddc9ab51ed1c928e3c5b5662c60ce"
+content-hash = "8e3982e5893f898e471d7e44f4fcdd31e90ccbdc77fe85d3a7e3be4356430829"
 
 [metadata.files]
 aiohttp = [
@@ -185,10 +166,6 @@ chardet = [
     {file = "chardet-4.0.0-py2.py3-none-any.whl", hash = "sha256:f864054d66fd9118f2e67044ac8981a54775ec5b67aed0441892edb553d21da5"},
     {file = "chardet-4.0.0.tar.gz", hash = "sha256:0d6f53a15db4120f2b08c94f11e7d93d2c911ee118b6b30a04ec3ee8310179fa"},
 ]
-chess = [
-    {file = "chess-1.6.1-py3-none-any.whl", hash = "sha256:7a7e167454f06c2326f25e099b9d8bca2aa6da20a20a2bb55de640552ca445aa"},
-    {file = "chess-1.6.1.tar.gz", hash = "sha256:966ba6483559dc0f9f3abd6faf2bca2e10550466af423be79a8765639d3dcd33"},
-]
 discord = [
     {file = "discord-1.7.3-py3-none-any.whl", hash = "sha256:248d728356e149c818a81b94659047a19305ea1623d4810bbb342f6b7df55f36"},
     {file = "discord-1.7.3.tar.gz", hash = "sha256:846dd3d66888c2e0a8bd9120d8778a0fe088c003a7f6451668497f14e322a304"},
@@ -239,10 +216,6 @@ multidict = [
     {file = "multidict-5.1.0-cp39-cp39-win32.whl", hash = "sha256:fc13a9524bc18b6fb6e0dbec3533ba0496bbed167c56d0aabefd965584557d80"},
     {file = "multidict-5.1.0-cp39-cp39-win_amd64.whl", hash = "sha256:7df80d07818b385f3129180369079bd6934cf70469f99daaebfac89dca288359"},
     {file = "multidict-5.1.0.tar.gz", hash = "sha256:25b4e5f22d3a37ddf3effc0710ba692cfc792c2b9edfb9c05aefe823256e84d5"},
-]
-python-chess = [
-    {file = "python-chess-1.999.tar.gz", hash = "sha256:8cad0388c42242d890ac6368ad64def15cd0165db033df0ad479492e266e5e6c"},
-    {file = "python_chess-1.999-py3-none-any.whl", hash = "sha256:93b562f8f1124cb7bf56fb095e18743758e69dc6a028ccda0badcaa5c59d88c8"},
 ]
 typing-extensions = [
     {file = "typing_extensions-3.10.0.0-py2-none-any.whl", hash = "sha256:0ac0f89795dd19de6b97debb0c6af1c70987fd80a2d62d1958f7e56fcc31b497"},
