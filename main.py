@@ -7,8 +7,10 @@ client = commands.Bot(command_prefix='.')
 
 games = {}
 
+def endGame():
+	print("Finished")
 ##variables
-class game(object):
+class game:
 	def __init__(self, player, channel):
 		self.board = {1: '#', 2: '#', 3: '#', 4: '#', 5: '#', 6: '#', 7: '#', 8: '#', 9: '#'}
 		self.player_token = 'O'
@@ -34,32 +36,19 @@ class game(object):
 			self.board[position] = letter
 			await self.printBoard()
 			if self.checkDraw():
-				print("It's a Draw")
+				await self.channel.send("It's a Draw")
 				gameOver = True
-				if self.requestRestart():
-					self.startGame(True, 'draw')
-				else:
-					exit()
+				endGame()
 			if self.checkForWin():
 				self.gameOver = False
-				if letter == 'X':
-					print("Bot wins!")
-					if self.requestRestart():
-						self.startGame(True, 'bot')
-					else:
-						exit()
+				if letter == self.bot_token:
+					self.channel.send("Bot wins!")
 				else:
-					print("Player wins!")
-					if self.requestRestart():
-						self.startGame(True, 'player')
-			return
+					self.channel.send("Player wins!")
+			if letter == self.player_token:
+				await self.compMove()
 		elif self.playerTurn:
 			await self.channel.send("Position is not Available")
-		
-		else:
-			print("Can't insert there!")
-			position = int(input("Please enter new position:  "))
-			await self.insertLetter(letter, position)
 		return
 
 	def checkForWin(self):
@@ -109,16 +98,15 @@ class game(object):
 		return True
 
 	async def playerMove(self, position:int):
-		if self.playerTurn:
-			if position  in range(1, 9):
-				await self.channel.send("Invalid Position")
-				print("Hello")
+			if position not in range(1, 10):
+				await self.channel.send("Invalid Position {}".format(position))
 				return
-			await self.insertLetter(self.player_token, position)
-			self.playerTurn = False
-			return
-		else:
-			await self.channel.send("Its not your Turn {}".format(self.player))
+			else:
+				await self.insertLetter(self.player_token, position)
+				await self.channel.send("{} plays {}".format(self.player, str(position)))
+				self.playerTurn = False
+				await self.compMove()
+				return
 
 	async def compMove(self):
 		bestScore = -800
@@ -126,18 +114,17 @@ class game(object):
 		for key in self.board.keys():
 			if (self.board[key] == '#'):
 				self.board[key] = self.bot_token
-				score = self.minimax(self.board, 0, False)
+				score = self.minimax(True)
 				self.board[key] = '#'
 				if (score > bestScore):
 					bestScore = score
 					bestMove = key
 
 		await self.insertLetter(self.bot_token, bestMove)
-		self.playerTurn = True
 		await self.channel.send("Bot plays {}".format(bestMove))
 		return
 
-	def minimax(self, board, depth, isMaximizing):
+	def minimax(self, isMaximizing):
 		if (self.checkWhichMarkWon(self.bot_token)):
 			return 100
 		elif (self.checkWhichMarkWon(self.player_token)):
@@ -148,9 +135,9 @@ class game(object):
 		if (isMaximizing):
 			bestScore = -800
 			for key in self.board.keys():
-				if (board[key] == '#'):
-					self.board[key] = self.bot
-					score = self.minimax(board, depth + 1, False)
+				if (self.board[key] == '#'):
+					self.board[key] = self.bot_token
+					score = self.minimax(False)
 					self.board[key] = '#'
 					if (score > bestScore):
 						bestScore = score
@@ -161,7 +148,7 @@ class game(object):
 			for key in self.board.keys():
 				if (self.board[key] == '#'):
 					self.board[key] = self.player_token
-					score = self.minimax(self.board, depth + 1, True)
+					score = self.minimax(True)
 					self.board[key] = '#'
 					if (score < bestScore):
 						bestScore = score
@@ -175,38 +162,34 @@ class game(object):
 				self.playerTurn = True
 		
 		if not botStarts:
-			await self.channel.send("{} goes first".format(self.player))
+			await self.channel.send("@{} goes first".format(self.player))
 			await self.printBoard()
 		else:
 			await self.channel.send("Bot goes first againts {}".format(self.player))
-		while not self.gameOver:
-			while not self.playerTurn:
-				await self.compMove()
+			await self.compMove()
 
 @client.command()
-async def play(ctx, position):
-	print("pls Print")
-	if (ctx.message.author in games):
-		print("Me First")
-		await games[ctx.message.author].playerMove(int(position))
-		print("hello")
-		return
+async def push(ctx, position):
+	if (ctx.message.author in games.keys()):
+		if ( not games[ctx.message.author].gameOver):
+			await games[ctx.message.author].playerMove(int(position))
+			return
 	else:
 		await ctx.send("You are not in a game use .start to start one")
-		print("something")
 		return
 
 @client.command()
 async def start(ctx):
-	if (ctx.message.author not in games):
+	if (ctx.message.author not in games.keys()):
 		games[ctx.message.author] = game(ctx.message.author, ctx.channel)
+		print("Starting")
 		await games[ctx.message.author].startGame()
-		return
 	else:
+		print("Not Starting")
 		await ctx.send("You are already in a game use .stop to stop the current game")
 
 @client.event
 async def on_ready():
-    print("logged in")
+    print("logged in as {}".format(client.user))
 
 client.run("ODIyMDgwODQ0ODk0MDQ0MTcx.YFNEcg.KrIGkmAIBQeifqWbi_JP5L3v0oM")
