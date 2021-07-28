@@ -7,8 +7,13 @@ client = commands.Bot(command_prefix='.')
 
 games = {}
 
-def endGame():
-	print("Finished")
+def endGame(current_game):
+	for keys in games.keys():
+		if games[keys] == current_game:
+			games.pop(keys)
+			break
+		else:
+			continue
 ##variables
 class game:
 	def __init__(self, player, channel):
@@ -36,17 +41,23 @@ class game:
 			self.board[position] = letter
 			await self.printBoard()
 			if self.checkDraw():
+				self.gameOver = True
 				await self.channel.send("It's a Draw")
-				gameOver = True
-				endGame()
+				endGame(self)
 			if self.checkForWin():
-				self.gameOver = False
+				self.gameOver = True
 				if letter == self.bot_token:
-					self.channel.send("Bot wins!")
+					await self.channel.send("Bot wins!")
+					endGame(self)
 				else:
-					self.channel.send("Player wins!")
-			if letter == self.player_token:
+					self.gameOver = True
+					await self.channel.send("Player wins!")
+					endGame(self)
+			if letter == self.player_token and not self.gameOver:
+				await self.channel.send("{} plays {}".format(self.player, str(position)))
 				await self.compMove()
+			if letter == self.bot_token and not self.gameOver:
+				await self.channel.send("Bot plays {} against {}".format(str(position), self.player))
 		elif self.playerTurn:
 			await self.channel.send("Position is not Available")
 		return
@@ -72,21 +83,21 @@ class game:
 			return False
 
 	def checkWhichMarkWon(self, mark):
-		if (self.board[1] == self.board[2] and self.board[1] == self.board[3] and self.board[1] != mark):
+		if (self.board[1] == self.board[2] and self.board[1] == self.board[3] and self.board[1] == mark):
 			return True
-		elif (self.board[4] == self.board[5] and self.board[4] == self.board[6] and self.board[4] != mark):
+		elif (self.board[4] == self.board[5] and self.board[4] == self.board[6] and self.board[4] == mark):
 			return True
-		elif (self.board[7] == self.board[8] and self.board[7] == self.board[9] and self.board[7] != mark):
+		elif (self.board[7] == self.board[8] and self.board[7] == self.board[9] and self.board[7] == mark):
 			return True
-		elif (self.board[1] == self.board[4] and self.board[1] ==self. board[7] and self.board[1] != mark):
+		elif (self.board[1] == self.board[4] and self.board[1] ==self. board[7] and self.board[1] == mark):
 			return True
-		elif (self.board[2] == self.board[5] and self.board[2] == self.board[8] and self.board[2] != mark):
+		elif (self.board[2] == self.board[5] and self.board[2] == self.board[8] and self.board[2] == mark):
 			return True	
-		elif (self.board[3] == self.board[6] and self.board[3] == self.board[9] and self.board[3] != mark):
+		elif (self.board[3] == self.board[6] and self.board[3] == self.board[9] and self.board[3] == mark):
 			return True
-		elif (self.board[1] == self.board[5] and self.board[1] == self.board[9] and self.board[1] != mark):
+		elif (self.board[1] == self.board[5] and self.board[1] == self.board[9] and self.board[1] == mark):
 			return True
-		elif (self.board[7] == self.board[5] and self.board[7] == self.board[3] and self.board[7] != mark):
+		elif (self.board[7] == self.board[5] and self.board[7] == self.board[3] and self.board[7] == mark):
 			return True
 		else:
 			return False
@@ -103,9 +114,7 @@ class game:
 				return
 			else:
 				await self.insertLetter(self.player_token, position)
-				await self.channel.send("{} plays {}".format(self.player, str(position)))
 				self.playerTurn = False
-				await self.compMove()
 				return
 
 	async def compMove(self):
@@ -114,14 +123,12 @@ class game:
 		for key in self.board.keys():
 			if (self.board[key] == '#'):
 				self.board[key] = self.bot_token
-				score = self.minimax(True)
+				score = self.minimax(False)
 				self.board[key] = '#'
 				if (score > bestScore):
 					bestScore = score
 					bestMove = key
-
 		await self.insertLetter(self.bot_token, bestMove)
-		await self.channel.send("Bot plays {}".format(bestMove))
 		return
 
 	def minimax(self, isMaximizing):
@@ -156,11 +163,6 @@ class game:
 
 	async def startGame(self):
 		botStarts = bool(random.randint(0, 1))
-		if botStarts:
-				self.playerTurn = False
-		else:
-				self.playerTurn = True
-		
 		if not botStarts:
 			await self.channel.send("@{} goes first".format(self.player))
 			await self.printBoard()
